@@ -1,12 +1,15 @@
 package com.example.ssgssg.global.ocr;
 
+import ch.qos.logback.core.net.SyslogOutputStream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -21,9 +24,27 @@ import java.util.UUID;
 @Service
 public class OCRService {
 
-    public static List<String> callApi(String type, String filePath,String apiUrl ,String naver_secretKey, String ext) {
-        String apiURL = apiUrl;
-        String secretKey = naver_secretKey;
+    @Value("${cloud.naver-ocr.secret-key}")
+    private String secretKey;
+
+    @Value("${cloud.naver-ocr.api-url}")
+    private String apiURL;
+
+    public List<String> uploadFileToOCR(MultipartFile file) throws IOException {
+        File tempFile = File.createTempFile("temp", file.getOriginalFilename());
+        file.transferTo(tempFile);
+        String fileName = tempFile.getName();
+        String filePath = tempFile.getPath();
+        String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
+        System.out.println(extension);
+        List<String> result = callApi("POST", filePath, extension);
+
+        tempFile.delete(); // 임시 파일 삭제
+
+        return result;
+    }
+
+    public List<String> callApi(String type, String filePath, String ext) {
         String imageFile = filePath;
         List<String> parseData = null;
 

@@ -11,12 +11,12 @@ import org.springframework.web.client.RestTemplate;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/gpt")
+@RequestMapping("/gpt/test")
 public class GPTTestController {
 
     private final GPTService gptService;
 
-    @GetMapping("/test")
+    @GetMapping("/static")
     public String chat(@RequestBody String prompt){
         String system_prompt="only answer in korean";
         String user_prompt="where is seoul?";
